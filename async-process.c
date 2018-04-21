@@ -42,6 +42,8 @@ struct process* create_process(char *const command[])
     exit(0);
   } else {
     struct process *process = malloc(sizeof(struct process));
+    if (process == NULL)
+      return NULL;
     process->pty = pty_master;
     process->name = malloc(strlen(pts_name) + 1);
     process->pid = pid;
