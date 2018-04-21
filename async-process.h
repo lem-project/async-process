@@ -11,6 +11,7 @@
 #include <string.h>
 
 struct process* create_process(char *const command[]);
+int process_pid(struct process *process);
 void process_send_input(struct process *process, const char *string);
 const char* process_receive_output(struct process *process);
 int process_alive_p(struct process *process);

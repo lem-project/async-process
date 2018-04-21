@@ -19,6 +19,9 @@
 (cffi:defcfun ("create_process" %create-process) :pointer
   (command :pointer))
 
+(cffi:defcfun "process_pid" :int
+  (process :pointer))
+
 (cffi:defcfun "process_send_input" :void
   (process :pointer)
   (string :string))

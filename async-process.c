@@ -50,6 +50,11 @@ struct process* create_process(char *const command[])
   }
 }
 
+int process_pid(struct process *process)
+{
+  return process->pid;
+}
+
 void process_send_input(struct process *process, const char *string)
 {
   write(process->pty, string, strlen(string));
