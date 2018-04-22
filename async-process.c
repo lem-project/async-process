@@ -7,13 +7,19 @@ struct process {
   pid_t pid;
 };
 
-static int open_pty(void)
+static const char* open_pty(int *out_fd)
 {
   int fd = posix_openpt(O_RDWR | O_CLOEXEC | O_NOCTTY);
-  if (fd < 0) return -1;
-  if (grantpt(fd) == -1 || unlockpt(fd) == -1) return -1;
+  if (fd < 0) return NULL;
+  if (grantpt(fd) == -1 || unlockpt(fd) == -1) return NULL;
   fcntl(fd, F_SETFD, FD_CLOEXEC);
-  return fd;
+  const char *name = ptsname(fd);
+  if (name == NULL) {
+    close(fd);
+    return NULL;
+  }
+  *out_fd = fd;
+  return name;
 }
 
 static struct process* allocate_process(int fd, const char *pts_name, int pid)
@@ -30,11 +36,8 @@ static struct process* allocate_process(int fd, const char *pts_name, int pid)
 
 struct process* create_process(char *const command[])
 {
-  int pty_master = open_pty();
-  if (pty_master == -1)
-    return NULL;
-
-  char *pts_name = ptsname(pty_master);
+  int pty_master;
+  const char *pts_name = open_pty(&pty_master);
   if (pts_name == NULL)
     return NULL;
 
