@@ -7,12 +7,12 @@
    :create-process))
 (in-package :async-process)
 
-(pushnew (asdf:system-source-directory :async-process)
+(pushnew (asdf:system-relative-pathname :async-process "./static/")
          cffi:*foreign-library-directories*
          :test #'uiop:pathname-equal)
 
 (cffi:define-foreign-library async-process
-  (:unix "async-process.so"))
+  (:unix "libasync-process.so"))
 
 (cffi:use-foreign-library async-process)
 
