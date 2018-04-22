@@ -79,6 +79,14 @@ struct process* create_process(char *const command[])
   return NULL;
 }
 
+void delete_process(struct process *process)
+{
+  kill(process->pid, 9);
+  close(process->fd);
+  free(process->pty_name);
+  free(process);
+}
+
 int process_pid(struct process *process)
 {
   return process->pid;
@@ -101,4 +109,4 @@ const char* process_receive_output(struct process *process)
 int process_alive_p(struct process *process)
 {
   return kill(process->pid, 0) == 0;
-} 
+}
