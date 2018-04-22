@@ -40,11 +40,17 @@ struct process* create_process(char *const command[])
 
   fcntl(pty_master, F_SETFL, O_NONBLOCK);
 
+  int pipefd[2];
+
+  if (pipe(pipefd) == -1) return NULL;
+
   pid_t pid = fork();
 
   if (pid == 0) {
+    close(pipefd[0]);
     pid = fork();
     if (pid == 0) {
+      close(pipefd[1]);
       setsid();
       int pty_slave = open(pts_name, O_RDWR | O_NOCTTY);
       close(pty_master);
@@ -54,13 +60,20 @@ struct process* create_process(char *const command[])
       close(pty_slave);
       execvp(command[0], command);
     } else {
+      char buf[12];
+      sprintf(buf, "%d", pid);
+      write(pipefd[1], buf, sizeof(buf));
+      close(pipefd[1]);
       exit(0);
     }
   } else {
-    int status;
-    if (waitpid(pid, &status, 0) == -1)
+    close(pipefd[1]);
+    if (waitpid(pid, NULL, 0) == -1)
       return NULL;
-    return allocate_process(pty_master, pts_name, pid);
+    char buf[12];
+    read(pipefd[0], buf, sizeof(buf));
+    close(pipefd[0]);
+    return allocate_process(pty_master, pts_name, atoi(buf));
   }
 
   return NULL;
