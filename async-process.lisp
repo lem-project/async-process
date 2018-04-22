@@ -2,7 +2,7 @@
   (:use :cl)
   (:export
    :process-send-input
-   :process-receive-input
+   :process-receive-output
    :process-alive-p
    :create-process))
 (in-package :async-process)
