@@ -65,7 +65,7 @@ struct process* create_process(char *const command[])
     } else {
       char buf[12];
       sprintf(buf, "%d", pid);
-      write(pipefd[1], buf, sizeof(buf));
+      write(pipefd[1], buf, strlen(buf)+1);
       close(pipefd[1]);
       exit(0);
     }
