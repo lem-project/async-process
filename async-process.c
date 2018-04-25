@@ -62,6 +62,16 @@ struct process* create_process(char *const command[])
       dup2(pty_slave, STDERR_FILENO);
       close(pty_slave);
       execvp(command[0], command);
+      int error_status = errno;
+      if (error_status == ENOENT) {
+        char str[128];
+        sprintf(str, "%s: command not found", command[0]);
+        write(STDIN_FILENO, str, strlen(str));
+      } else {
+        char *str = strerror(error_status);
+        write(STDIN_FILENO, str, strlen(str));
+      }
+      exit(error_status);
     } else {
       char buf[12];
       sprintf(buf, "%d", pid);
