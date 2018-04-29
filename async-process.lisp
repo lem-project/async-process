@@ -1,6 +1,7 @@
 (defpackage :async-process
   (:use :cl)
   (:export
+   :delete-process
    :process-send-input
    :process-receive-output
    :process-alive-p
