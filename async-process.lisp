@@ -18,7 +18,8 @@
 (cffi:use-foreign-library async-process)
 
 (cffi:defcfun ("create_process" %create-process) :pointer
-  (command :pointer))
+  (command :pointer)
+  (nonblock :boolean))
 
 (cffi:defcfun "delete_process" :void
   (process :pointer))
@@ -36,7 +37,7 @@
 (cffi:defcfun "process_alive_p" :boolean
   (process :pointer))
 
-(defun create-process (command)
+(defun create-process (command &key nonblock)
   (let* ((command (uiop:ensure-list command))
          (length (length command)))
     (cffi:with-foreign-object (argv :string (1+ length))
@@ -44,4 +45,4 @@
             :for c :in command
             :do (setf (cffi:mem-aref argv :string i) c))
       (setf (cffi:mem-aref argv :string length) (cffi:null-pointer))
-      (%create-process argv))))
+      (%create-process argv nonblock))))

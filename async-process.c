@@ -34,14 +34,15 @@ static struct process* allocate_process(int fd, const char *pts_name, int pid)
   return process;
 }
 
-struct process* create_process(char *const command[])
+struct process* create_process(char *const command[], bool nonblock)
 {
   int pty_master;
   const char *pts_name = open_pty(&pty_master);
   if (pts_name == NULL)
     return NULL;
 
-  fcntl(pty_master, F_SETFL, O_NONBLOCK);
+  if (nonblock)
+    fcntl(pty_master, F_SETFL, O_NONBLOCK);
 
   int pipefd[2];
 
