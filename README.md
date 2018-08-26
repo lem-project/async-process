@@ -13,17 +13,7 @@ CL-USER> (in-package async-process)
 #<PACKAGE "ASYNC-PROCESS">
 ASYNC-PROCESS> (create-process "python")
 #.(SB-SYS:INT-SAP #X7FFFEC002830)
-ASYNC-PROCESS> (setq p *)
-; in: SETQ P
-;     (SETQ ASYNC-PROCESS::P *)
-; 
-; caught WARNING:
-;   undefined variable: P
-; 
-; compilation unit finished
-;   Undefined variable:
-;     P
-;   caught 1 WARNING condition
+ASYNC-PROCESS> (defparameter p *)
 #.(SB-SYS:INT-SAP #X7FFFEC002830)
 ASYNC-PROCESS> (process-receive-output p)
 "Python 2.7.13 (default, Nov 24 2017, 17:33:09) 
