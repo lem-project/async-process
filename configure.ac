@@ -1,4 +1,6 @@
 AC_INIT([async-process], [0.1])
+AM_CONFIG_HEADER(config.h)
+
 AM_INIT_AUTOMAKE([foreign])
 LT_INIT(shared)
 AC_PROG_CC
