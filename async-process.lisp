@@ -12,8 +12,12 @@
          cffi:*foreign-library-directories*
          :test #'uiop:pathname-equal)
 
+(eval-when (:compile-toplevel :load-toplevel :execute)
+  (defun system (cmd)
+    (ignore-errors (string-right-trim '(#\Newline) (uiop:run-program cmd :output :string)))))
+
 (cffi:define-foreign-library async-process
-  (:unix "libasync-process.so"))
+  (:unix #.(format nil "libasyncprocess-~A-~A.so" (system "uname -m") (system "uname") )))
 
 (cffi:use-foreign-library async-process)
 
