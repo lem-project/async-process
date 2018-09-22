@@ -28,3 +28,6 @@ ASYNC-PROCESS> (process-receive-output p)
 2
 >>> "
 ```
+
+## LICENSE
+MIT
