@@ -1,5 +1,6 @@
 #include "async-process.h"
 
+#ifndef HAVE_WINDOWS_H
 struct process {
   int fd;
   char *pty_name;
@@ -124,3 +125,4 @@ int process_alive_p(struct process *process)
 {
   return kill(process->pid, 0) == 0;
 }
+#endif
