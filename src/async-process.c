@@ -3,7 +3,7 @@
 struct process {
   int fd;
   char *pty_name;
-  char buffer[256];
+  char buffer[1024*4];
   pid_t pid;
 };
 
