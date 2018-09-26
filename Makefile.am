@@ -1,6 +1,6 @@
 pkglib_LTLIBRARIES = libasyncprocess.la
 libasyncprocess_la_LDFLAGS = -module -avoid-version
-libasyncprocess_la_SOURCES = async-process.c
+libasyncprocess_la_SOURCES = src/async-process.c
 
 copy:
 	cp -f .libs/libasyncprocess.so static/libasyncprocess-`uname -m`-`uname`.so|true
