@@ -8,7 +8,7 @@
    :create-process))
 (in-package :async-process)
 
-(pushnew (asdf:system-relative-pathname :async-process "./static/")
+(pushnew (asdf:system-relative-pathname :async-process "../static/")
          cffi:*foreign-library-directories*
          :test #'uiop:pathname-equal)
 
