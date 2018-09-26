@@ -5,3 +5,6 @@ autoheader
 automake -a
 autoconf
 
+./configure
+make
+make copy
