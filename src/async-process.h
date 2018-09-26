@@ -1,14 +1,24 @@
 #ifndef _ASYNC_PROCESS_H_
 #define _ASYNC_PROCESS_H_
 
-#define _GNU_SOURCE
-#include <signal.h>
-#include <errno.h>
+#ifdef HAVE_CONFIG_H
+#  include "config.h"
+#endif
+
+
+#ifdef HAVE_WINDOWS_H
+# include <windows.h>
+#else
+# define _GNU_SOURCE
+# include <signal.h>
+# include <errno.h>
+# include <fcntl.h>
+# include <sys/wait.h>
+#endif
+
 #include <stdio.h>
 #include <unistd.h>
 #include <stdlib.h>
-#include <fcntl.h>
-#include <sys/wait.h>
 #include <string.h>
 #include <stdbool.h>
 

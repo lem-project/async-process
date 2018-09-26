@@ -17,7 +17,10 @@
     (ignore-errors (string-right-trim '(#\Newline) (uiop:run-program cmd :output :string)))))
 
 (cffi:define-foreign-library async-process
-  (:unix #.(format nil "libasyncprocess-~A-~A.so" (system "uname -m") (system "uname") )))
+  (:unix #.(format nil "libasyncprocess-~A-~A.so" (system "uname -m") (system "uname")))
+  (:windows #.(format nil "libasyncprocess-~A.dll" (if (or #+x86-64 t)
+						       "x86_64"
+						       "x86"))))
 
 (cffi:use-foreign-library async-process)
 
