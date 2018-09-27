@@ -22,6 +22,19 @@
 #include <string.h>
 #include <stdbool.h>
 
+struct process {
+  char buffer[1024*4];
+#ifdef HAVE_WINDOWS_H
+  PROCESS_INFORMATION pi;
+  HANDLE hInputWrite;
+  HANDLE hOutputRead;
+#else
+  int fd;
+  char *pty_name;
+  pid_t pid;
+#endif
+};
+
 struct process* create_process(char *const command[], bool nonblock);
 void delete_process(struct process *process);
 int process_pid(struct process *process);

@@ -1,19 +1,11 @@
 #include "async-process.h"
 #ifdef HAVE_WINDOWS_H
 
-struct process {
-  PROCESS_INFORMATION pi;
-  char buffer[256];
-  HANDLE hInputWrite;
-  HANDLE hOutputRead;
-};
-
 __declspec(dllexport)
 struct process* create_process(char *const command[], bool nonblock)
 {
   struct process* ret=malloc(sizeof(struct process));
   HANDLE hErrorWrite = INVALID_HANDLE_VALUE;
-
   HANDLE hOutputReadTmp = INVALID_HANDLE_VALUE;
   HANDLE hOutputWrite = INVALID_HANDLE_VALUE;
   HANDLE hInputWriteTmp = INVALID_HANDLE_VALUE;

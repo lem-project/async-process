@@ -1,12 +1,6 @@
 #include "async-process.h"
 
 #ifndef HAVE_WINDOWS_H
-struct process {
-  int fd;
-  char *pty_name;
-  char buffer[1024*4];
-  pid_t pid;
-};
 
 static const char* open_pty(int *out_fd)
 {
