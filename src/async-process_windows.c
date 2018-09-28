@@ -96,7 +96,8 @@ __declspec(dllexport)
 const char* process_receive_output(struct process *process)
 {
   DWORD n = 0;
-  if (ReadFile(process->hOutputRead, process->buffer, sizeof(process->buffer), &n, NULL)) {
+  if (ReadFile(process->hOutputRead, process->buffer, sizeof(process->buffer)-1, &n, NULL)) {
+    (process->buffer)[n] = 0;
     return process->buffer;
   }
   return NULL;
