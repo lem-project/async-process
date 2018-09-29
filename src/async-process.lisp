@@ -24,27 +24,31 @@
 
 (cffi:use-foreign-library async-process)
 
+(defclass process ()
+  ((process :reader process-process :initarg :process)
+   (encode :accessor process-encode :initarg :encode)))
+
 (cffi:defcfun ("create_process" %create-process) :pointer
   (command :pointer)
   (nonblock :boolean))
 
-(cffi:defcfun "delete_process" :void
+(cffi:defcfun ("delete_process" %delete-process) :void
   (process :pointer))
 
-(cffi:defcfun "process_pid" :int
+(cffi:defcfun ("process_pid" %process-pid) :int
   (process :pointer))
 
-(cffi:defcfun "process_send_input" :void
+(cffi:defcfun ("process_send_input" %process-send-input) :void
   (process :pointer)
   (string :string))
 
-(cffi:defcfun "process_receive_output" :string
+(cffi:defcfun ("process_receive_output" %process-receive-output) :string
   (process :pointer))
 
-(cffi:defcfun "process_alive_p" :boolean
+(cffi:defcfun ("process_alive_p" %process-alive-p) :boolean
   (process :pointer))
 
-(defun create-process (command &key nonblock)
+(defun create-process (command &key nonblock (encode cffi:*default-foreign-encoding*))
   (let* ((command (uiop:ensure-list command))
          (length (length command)))
     (cffi:with-foreign-object (argv :string (1+ length))
@@ -52,4 +56,23 @@
             :for c :in command
             :do (setf (cffi:mem-aref argv :string i) c))
       (setf (cffi:mem-aref argv :string length) (cffi:null-pointer))
-      (%create-process argv nonblock))))
+      (make-instance 'process
+		     :process (%create-process argv nonblock)
+		     :encode  encode))))
+
+(defun delete-process (process)
+  (%delete-process (process-process process)))
+
+(defun process-pid (process)
+  (%process-pid (process-process process)))
+
+(defun process-send-input (process string)
+  (let ((cffi:*default-foreign-encoding* (process-encode process)))
+    (%process-send-input (process-process process) string)))
+
+(defun process-receive-output (process)
+  (let ((cffi:*default-foreign-encoding* (process-encode process)))
+    (%process-receive-output (process-process process))))
+
+(defun process-alive-p (process)
+  (%process-alive-p (process-process process)))

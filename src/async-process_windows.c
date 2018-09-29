@@ -12,7 +12,7 @@ struct process* create_process(char *const command[], bool nonblock)
   HANDLE hInputRead = INVALID_HANDLE_VALUE;
 
   SECURITY_ATTRIBUTES sa;
-
+  ret->nonblock=nonblock;
   sa.nLength = sizeof(SECURITY_ATTRIBUTES);
   sa.lpSecurityDescriptor = 0;
   sa.bInheritHandle = TRUE;
@@ -73,16 +73,17 @@ struct process* create_process(char *const command[], bool nonblock)
 __declspec(dllexport)
 void delete_process(struct process *process)
 {
+  TerminateProcess(process->pi.hProcess,2);
   CloseHandle(process->hInputWrite);
   CloseHandle(process->hOutputRead);
   CloseHandle(process->pi.hThread);
-  CloseHandle(process->pi.hProcess);
+  free(process);
 }
 
 __declspec(dllexport)
 int process_pid(struct process *process)
 {
-  return 0;
+  return process->pi.dwProcessId;
 }
 
 __declspec(dllexport)
@@ -96,6 +97,13 @@ __declspec(dllexport)
 const char* process_receive_output(struct process *process)
 {
   DWORD n = 0;
+  DWORD avail;
+  if(process->nonblock) {
+    if (!PeekNamedPipe (process->hOutputRead, 0, 0, 0, &avail, 0))
+      return NULL;
+    if(!avail)
+      return NULL;
+  }
   if (ReadFile(process->hOutputRead, process->buffer, sizeof(process->buffer)-1, &n, NULL)) {
     (process->buffer)[n] = 0;
     return process->buffer;
@@ -106,5 +114,8 @@ const char* process_receive_output(struct process *process)
 __declspec(dllexport)
 int process_alive_p(struct process *process)
 {
+  DWORD dwExitCode;
+  GetExitCodeProcess(process->pi.hProcess, &dwExitCode);
+  return (dwExitCode == STILL_ACTIVE);
 }
 #endif
