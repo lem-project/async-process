@@ -105,7 +105,7 @@ const char* process_receive_output(struct process *process)
       return NULL;
   }
   if (ReadFile(process->hOutputRead, process->buffer, sizeof(process->buffer)-1, &n, NULL)) {
-    (process->buffer)[n] = 0;
+    process->buffer[n] = '\0';
     return process->buffer;
   }
   return NULL;
