@@ -28,6 +28,7 @@ struct process {
   PROCESS_INFORMATION pi;
   HANDLE hInputWrite;
   HANDLE hOutputRead;
+  bool nonblock;
 #else
   int fd;
   char *pty_name;
