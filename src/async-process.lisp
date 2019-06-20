@@ -56,9 +56,10 @@
             :for c :in command
             :do (setf (cffi:mem-aref argv :string i) c))
       (setf (cffi:mem-aref argv :string length) (cffi:null-pointer))
-      (make-instance 'process
-		     :process (%create-process argv nonblock)
-		     :encode  encode))))
+      (let ((p (%create-process argv nonblock)))
+        (if (cffi:null-pointer-p p)
+            (error "create-process failed: ~S" command)
+            (make-instance 'process :process p :encode encode))))))
 
 (defun delete-process (process)
   (%delete-process (process-process process)))
