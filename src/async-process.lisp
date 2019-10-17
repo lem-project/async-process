@@ -8,19 +8,25 @@
    :create-process))
 (in-package :async-process)
 
-(pushnew (asdf:system-relative-pathname :async-process "../static/")
-         cffi:*foreign-library-directories*
-         :test #'uiop:pathname-equal)
-
 (eval-when (:compile-toplevel :load-toplevel :execute)
   (defun system (cmd)
     (ignore-errors (string-right-trim '(#\Newline) (uiop:run-program cmd :output :string)))))
 
+(pushnew (asdf:system-relative-pathname :async-process
+                                        (format nil "../static/~A/"
+                                                (cond ((uiop/os:featurep '(:and :windows :x86-64))
+                                                       "x86_64/windows")
+                                                      ((uiop/os:featurep :windows) "x86/windows")
+                                                      ((uiop/os:featurep :unix)
+                                                       (format nil "~A/~A"
+                                                               (system "uname -m")
+                                                               (system "uname"))))))
+         cffi:*foreign-library-directories*
+         :test #'uiop:pathname-equal)
+
 (cffi:define-foreign-library async-process
-  (:unix #.(format nil "libasyncprocess-~A-~A.so" (system "uname -m") (system "uname")))
-  (:windows #.(format nil "libasyncprocess-~A.dll" (if (or #+x86-64 t)
-						       "x86_64"
-						       "x86"))))
+  (:unix "libasyncprocess.so")
+  (:windows "libasyncprocess.dll"))
 
 (cffi:use-foreign-library async-process)
 
