@@ -53,6 +53,13 @@ struct process* create_process(char *const command[], bool nonblock)
       setsid();
       int pty_slave = open(pts_name, O_RDWR | O_NOCTTY);
       close(pty_master);
+
+      // Set raw mode
+      struct termios tty;
+      tcgetattr(pty_slave, &tty);
+      cfmakeraw(&tty);
+      tcsetattr(pty_slave, TCSANOW, &tty);
+
       dup2(pty_slave, STDIN_FILENO);
       dup2(pty_slave, STDOUT_FILENO);
       dup2(pty_slave, STDERR_FILENO);

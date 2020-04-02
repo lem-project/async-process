@@ -14,6 +14,7 @@
 # include <errno.h>
 # include <fcntl.h>
 # include <sys/wait.h>
+# include <termios.h>
 #endif
 
 #include <stdio.h>
