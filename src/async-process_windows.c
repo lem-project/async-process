@@ -2,7 +2,7 @@
 #ifdef HAVE_WINDOWS_H
 
 __declspec(dllexport)
-struct process* create_process(char *const command[], bool nonblock)
+struct process* create_process(char *const command[], bool nonblock, const char *path)
 {
   struct process* ret=malloc(sizeof(struct process));
   HANDLE hErrorWrite = INVALID_HANDLE_VALUE;
@@ -60,7 +60,7 @@ struct process* create_process(char *const command[], bool nonblock)
       }else
 	tmp[k]=command[i][j];
     }
-    if (!CreateProcessA(0, tmp, 0, 0, TRUE, CREATE_NO_WINDOW, 0, 0, &si, &(ret->pi)))
+    if (!CreateProcessA(0, tmp, 0, 0, TRUE, CREATE_NO_WINDOW, 0, path, &si, &(ret->pi)))
       return NULL;
   }
   CloseHandle(hOutputWrite);

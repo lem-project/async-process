@@ -37,7 +37,7 @@ struct process {
 #endif
 };
 
-struct process* create_process(char *const command[], bool nonblock);
+struct process* create_process(char *const command[], bool nonblock, const char *path);
 void delete_process(struct process *process);
 int process_pid(struct process *process);
 void process_send_input(struct process *process, const char *string);
