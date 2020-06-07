@@ -63,7 +63,9 @@
             :for c :in command
             :do (setf (cffi:mem-aref argv :string i) c))
       (setf (cffi:mem-aref argv :string length) (cffi:null-pointer))
-      (let ((p (%create-process argv nonblock (when directory (namestring directory)))))
+      (let ((p (%create-process argv nonblock (if directory
+                                                  (namestring directory)
+                                                  (cffi:null-pointer)))))
         (if (cffi:null-pointer-p p)
             (error "create-process failed: ~S" command)
             (make-instance 'process :process p :encode encode))))))
