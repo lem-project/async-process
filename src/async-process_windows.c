@@ -60,7 +60,7 @@ struct process* create_process(char *const command[], bool nonblock, const char 
       }else
 	tmp[k]=command[i][j];
     }
-    if (!CreateProcessA(0, tmp, 0, 0, TRUE, CREATE_NO_WINDOW, 0, 0, &si, &(ret->pi)))
+    if (!CreateProcessA(0, tmp, 0, 0, TRUE, CREATE_NO_WINDOW, 0, path, &si, &(ret->pi)))
       return NULL;
   }
   CloseHandle(hOutputWrite);
