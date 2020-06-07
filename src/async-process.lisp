@@ -56,6 +56,8 @@
   (process :pointer))
 
 (defun create-process (command &key nonblock (encode cffi:*default-foreign-encoding*) directory)
+  (when (and directory (not (uiop:directory-exists-p directory)))
+    (error "Directory ~S does not exist" directory))
   (let* ((command (uiop:ensure-list command))
          (length (length command)))
     (cffi:with-foreign-object (argv :string (1+ length))
