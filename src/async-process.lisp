@@ -55,7 +55,7 @@
 (cffi:defcfun ("process_alive_p" %process-alive-p) :boolean
   (process :pointer))
 
-(defun create-process (command &key nonblock (encode cffi:*default-foreign-encoding*) (directory nil directory-p))
+(defun create-process (command &key nonblock (encode cffi:*default-foreign-encoding*) directory)
   (let* ((command (uiop:ensure-list command))
          (length (length command)))
     (cffi:with-foreign-object (argv :string (1+ length))
@@ -63,7 +63,7 @@
             :for c :in command
             :do (setf (cffi:mem-aref argv :string i) c))
       (setf (cffi:mem-aref argv :string length) (cffi:null-pointer))
-      (let ((p (%create-process argv nonblock (if directroy-p (namestring directory)))))
+      (let ((p (%create-process argv nonblock (when directroy (namestring directory)))))
         (if (cffi:null-pointer-p p)
             (error "create-process failed: ~S" command)
             (make-instance 'process :process p :encode encode))))))
