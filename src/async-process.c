@@ -29,7 +29,7 @@ static struct process* allocate_process(int fd, const char *pts_name, int pid)
   return process;
 }
 
-struct process* create_process(char *const command[], bool nonblock)
+struct process* create_process(char *const command[], bool nonblock, const char *path)
 {
   int pty_master;
   const char *pts_name = open_pty(&pty_master);
@@ -64,6 +64,7 @@ struct process* create_process(char *const command[], bool nonblock)
       dup2(pty_slave, STDOUT_FILENO);
       dup2(pty_slave, STDERR_FILENO);
       close(pty_slave);
+      if (path != NULL) chdir(path);
       execvp(command[0], command);
       int error_status = errno;
       if (error_status == ENOENT) {
