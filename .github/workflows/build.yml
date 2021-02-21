@@ -11,6 +11,8 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 90
     env:
+      OS_NAME: unknown
+      ARCH_NAME: unknown
       DLL_NAME: libasyncprocess.so
       RESULT_NAME: result-linux
       RESULT_PATH: result-linux
@@ -24,8 +26,8 @@ jobs:
         uname -m
         OS_NAME=`uname`
         ARCH_NAME=`uname -m`
-        echo "::set-env name=OS_NAME::$OS_NAME"
-        echo "::set-env name=ARCH_NAME::$ARCH_NAME"
+        echo "OS_NAME=$OS_NAME" >> $GITHUB_ENV
+        echo "ARCH_NAME=$ARCH_NAME" >> $GITHUB_ENV
     - name: Build
       run: |
         gcc -v
@@ -62,10 +64,10 @@ jobs:
         architecture: aarch64
         distribution: ubuntu18.04
         run: |
-          apt -y update
-          apt -y install build-essential
-          apt -y install automake
-          apt -y install libtool
+          apt-get update
+          apt-get -y install build-essential
+          apt-get -y install automake
+          apt-get -y install libtool
           pwd
           uname
           uname -m
@@ -88,6 +90,8 @@ jobs:
     runs-on: macos-latest
     timeout-minutes: 90
     env:
+      OS_NAME: unknown
+      ARCH_NAME: unknown
       DLL_NAME: libasyncprocess.so
       RESULT_NAME: result-osx
       RESULT_PATH: result-osx
@@ -101,8 +105,8 @@ jobs:
         uname -m
         OS_NAME=`uname`
         ARCH_NAME=`uname -m`
-        echo "::set-env name=OS_NAME::$OS_NAME"
-        echo "::set-env name=ARCH_NAME::$ARCH_NAME"
+        echo "OS_NAME=$OS_NAME" >> $GITHUB_ENV
+        echo "ARCH_NAME=$ARCH_NAME" >> $GITHUB_ENV
     - name: Install tools
       run: |
         brew install automake
@@ -142,12 +146,8 @@ jobs:
           arch2: x86
           bit: 32
     env:
-      MSYSTEM: MINGW${{ matrix.bit }}
-      MSYS2_PATH_TYPE: inherit
-      MSYS2_PATH_LIST: D:\msys64\mingw${{ matrix.bit }}\bin;D:\msys64\usr\local\bin;D:\msys64\usr\bin;D:\msys64\bin
-      MSYS2_TARBALL_URL1: https://github.com/msys2/msys2-installer/releases/download/nightly-x86_64/msys2-base-x86_64-latest.tar.xz
-      MSYS2_TARBALL_URL2: http://repo.msys2.org/distrib/x86_64/msys2-base-x86_64-20190524.tar.xz
-      MSYS2_TARBALL_URL3: https://sourceforge.net/projects/msys2/files/Base/x86_64/msys2-base-x86_64-20190524.tar.xz
+      OS_NAME: windows
+      ARCH_NAME: ${{ matrix.arch2 }}
       DLL_NAME: libasyncprocess.dll
       RESULT_NAME: result-windows-${{ matrix.arch }}
       RESULT_PATH: result-windows-${{ matrix.arch }}
@@ -155,70 +155,34 @@ jobs:
     steps:
     - run: git config --global core.autocrlf false
     - uses: actions/checkout@v2
-    - name: Install MSYS2
-      run: |
-        bash -lc @'
-          pwd
-          curl -f -L -o msys2.tar.xz $MSYS2_TARBALL_URL1 ||
-          curl -f    -o msys2.tar.xz $MSYS2_TARBALL_URL2 ||
-          curl -f -L -o msys2.tar.xz $MSYS2_TARBALL_URL3
-          err1=$?
-          #tar xf msys2.tar.xz -C /d/
-          7z x msys2.tar.xz -so | 7z x -aoa -si -ttar -oD:
-          ls -l /d/
-          exit $err1
-        '@
-    - name: Add MSYS2 path
-      run: |
-        echo "::set-env name=PATH::$env:MSYS2_PATH_LIST;$env:PATH"
+    - uses: msys2/setup-msys2@v2
+      with:
+        msystem: MINGW${{ matrix.bit }}
+        path-type: inherit
+        release: true
+        update: true
+        install: 'base-devel mingw-w64-${{ matrix.arch }}-toolchain'
     - name: Run MSYS2 once
+      shell: msys2 {0}
       run: |
-        bash -lc @'
-          pwd
-          cd $GITHUB_WORKSPACE
-          pwd
-          echo $PATH
-        '@
-    - name: Update MSYS2
-      run: |
-        bash -lc @'
-          pacman --version
-          pacman -Syyuu --noconfirm
-        '@
-    - name: Install MinGW-w64
-      run: |
-        bash -lc @'
-          pacman --version
-          pacman -S --noconfirm base-devel &&
-          pacman -S --noconfirm mingw${{ matrix.bit }}/mingw-w64-${{ matrix.arch }}-toolchain
-        '@
-    - name: Set environment variables
-      run: |
-        bash -lc @'
-          pwd
-          uname
-          uname -m
-          OS_NAME=windows
-          ARCH_NAME=${{ matrix.arch2 }}
-          echo \"::set-env name=OS_NAME::$OS_NAME\"
-          echo \"::set-env name=ARCH_NAME::$ARCH_NAME\"
-        '@
+        pwd
+        echo $MSYSTEM
+        echo $MSYS2_PATH_TYPE
+        echo $PATH
+        uname
+        uname -m
     - name: Build
+      shell: msys2 {0}
       run: |
-        bash -lc @'
-          cd $GITHUB_WORKSPACE
-          gcc -v
-          rm static/$ARCH_NAME/$OS_NAME/$DLL_NAME
-          ./bootstrap
-        '@
+        gcc -v
+        rm static/$ARCH_NAME/$OS_NAME/$DLL_NAME
+        ./bootstrap
     - name: Copy Result
       if: always()
+      shell: msys2 {0}
       run: |
-        bash -lc @'
-          cd $GITHUB_WORKSPACE
-          mkdir -p $RESULT_PATH/$RESULT_PATH_SUB/$ARCH_NAME/$OS_NAME
-          cp static/$ARCH_NAME/$OS_NAME/$DLL_NAME $RESULT_PATH/$RESULT_PATH_SUB/$ARCH_NAME/$OS_NAME
-        '@
+        mkdir -p $RESULT_PATH/$RESULT_PATH_SUB/$ARCH_NAME/$OS_NAME
+        cp static/$ARCH_NAME/$OS_NAME/$DLL_NAME $RESULT_PATH/$RESULT_PATH_SUB/$ARCH_NAME/$OS_NAME
     - name: Upload Result
       if: always()
       uses: actions/upload-artifact@v1
