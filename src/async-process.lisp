@@ -20,7 +20,12 @@
                                                       ((uiop/os:featurep :unix)
                                                        (format nil "~A/~A"
                                                                (system "uname -m")
-                                                               (system "uname"))))))
+                                                               (let ((os (system "uname")))
+                                                                 (if (equal os "Linux")
+                                                                     (cond ((zerop (nth-value 2 (uiop:run-program "ldd /bin/ls |grep musl &> /dev/null" :ignore-error-status t)))
+                                                                            "Linux-musl")
+                                                                           (t os))
+                                                                     os)))))))
          cffi:*foreign-library-directories*
          :test #'uiop:pathname-equal)
 
