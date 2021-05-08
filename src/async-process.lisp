@@ -12,20 +12,24 @@
   (defun system (cmd)
     (ignore-errors (string-right-trim '(#\Newline) (uiop:run-program cmd :output :string)))))
 
-(pushnew (asdf:system-relative-pathname :async-process
-                                        (format nil "../static/~A/"
-                                                (cond ((uiop/os:featurep '(:and :windows :x86-64))
-                                                       "x86_64/windows")
-                                                      ((uiop/os:featurep :windows) "x86/windows")
-                                                      ((uiop/os:featurep :unix)
-                                                       (format nil "~A/~A"
-                                                               (system "uname -m")
-                                                               (let ((os (system "uname")))
-                                                                 (if (equal os "Linux")
-                                                                     (cond ((zerop (nth-value 2 (uiop:run-program "ldd /bin/ls |grep musl &> /dev/null" :ignore-error-status t)))
-                                                                            "Linux-musl")
-                                                                           (t os))
-                                                                     os)))))))
+(pushnew (asdf:system-relative-pathname
+          :async-process
+          (format nil "../static/~A/"
+                  (cond ((uiop/os:featurep '(:and :windows :x86-64))
+                         "x86_64/windows")
+                        ((uiop/os:featurep :windows) "x86/windows")
+                        ((uiop/os:featurep :unix)
+                         (format nil "~A/~A"
+                                 (system "uname -m")
+                                 (let ((os (system "uname")))
+                                   (if (equal os "Linux")
+                                       (cond ((zerop (length (uiop:run-program
+                                                              "ldd /bin/ls |grep musl"
+                                                              :ignore-error-status t
+                                                              :output :string)))
+                                              "Linux-musl")
+                                             (t os))
+                                       os)))))))
          cffi:*foreign-library-directories*
          :test #'uiop:pathname-equal)
 
