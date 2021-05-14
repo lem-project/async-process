@@ -10,7 +10,13 @@
 
 (eval-when (:compile-toplevel :load-toplevel :execute)
   (defun system (cmd)
-    (ignore-errors (string-right-trim '(#\Newline) (uiop:run-program cmd :output :string)))))
+    (ignore-errors (string-right-trim '(#\Newline) (uiop:run-program cmd :output :string))))
+  (defun muslp ()
+    (ignore-errors
+      (not (zerop (length (uiop:run-program
+                           "ldd /bin/ls |grep musl"
+                           :ignore-error-status t
+                           :output :string)))))))
 
 (pushnew (asdf:system-relative-pathname
           :async-process
@@ -22,14 +28,10 @@
                          (format nil "~A/~A"
                                  (system "uname -m")
                                  (let ((os (system "uname")))
-                                   (if (equal os "Linux")
-                                       (cond ((zerop (length (uiop:run-program
-                                                              "ldd /bin/ls |grep musl"
-                                                              :ignore-error-status t
-                                                              :output :string)))
-                                              "Linux-musl")
-                                             (t os))
-                                       os)))))))
+                                   (cond ((and (equal os "Linux")
+                                               (muslp))
+                                          "Linux-musl")
+                                         (t os))))))))
          cffi:*foreign-library-directories*
          :test #'uiop:pathname-equal)
 
