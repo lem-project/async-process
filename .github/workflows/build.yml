@@ -30,7 +30,7 @@ jobs:
         echo "ARCH_NAME=$ARCH_NAME" >> $GITHUB_ENV
     - name: Install
       run: |
-        sudo apt-get install libtoolize automake
+        sudo apt-get install libtool automake
     - name: Build
       run: |
         gcc -v
