@@ -28,6 +28,9 @@ jobs:
         ARCH_NAME=`uname -m`
         echo "OS_NAME=$OS_NAME" >> $GITHUB_ENV
         echo "ARCH_NAME=$ARCH_NAME" >> $GITHUB_ENV
+    - name: Install
+      run: |
+        sudo apt-get insatll libtoolize automake
     - name: Build
       run: |
         gcc -v
