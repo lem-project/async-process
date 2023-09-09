@@ -29,7 +29,7 @@ static struct process* allocate_process(int fd, const char *pts_name, int pid)
   return process;
 }
 
-static void my_exit(int status) {
+void my_exit(int status) {
   // exitを使うとatexitで動作に影響を与えられる、これが原因でプロセスを終了できなくなる事があるので使うのを避ける
   // 例えばSDL2はat_exitを使っているせいか、lemのSDL2 frontendでasync_processが動作しなくなっていた
   _exit(status);
