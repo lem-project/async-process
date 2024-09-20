@@ -60,7 +60,7 @@
   (process :pointer)
   (string :string))
 
-(cffi:defcfun ("process_receive_output" %process-receive-output) :string
+(cffi:defcfun ("process_receive_output" %process-receive-output) :pointer
   (process :pointer))
 
 (cffi:defcfun ("process_alive_p" %process-alive-p) :boolean
@@ -93,9 +93,16 @@
   (let ((cffi:*default-foreign-encoding* (process-encode process)))
     (%process-send-input (process-process process) string)))
 
+(defun pointer-to-string (pointer)
+  (let ((bytes (loop :for i :from 0
+                     :for code := (cffi:mem-aref pointer :unsigned-char i)
+                     :until (zerop code)
+                     :collect code)))
+    (map 'string 'code-char bytes)))
+
 (defun process-receive-output (process)
   (let ((cffi:*default-foreign-encoding* (process-encode process)))
-    (%process-receive-output (process-process process))))
+    (pointer-to-string (%process-receive-output (process-process process)))))
 
 (defun process-alive-p (process)
   (%process-alive-p (process-process process)))
