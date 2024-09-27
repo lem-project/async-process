@@ -94,11 +94,12 @@
     (%process-send-input (process-process process) string)))
 
 (defun pointer-to-string (pointer)
-  (let ((bytes (loop :for i :from 0
-                     :for code := (cffi:mem-aref pointer :unsigned-char i)
-                     :until (zerop code)
-                     :collect code)))
-    (map 'string 'code-char bytes)))
+  (unless (cffi:null-pointer-p pointer)
+    (let ((bytes (loop :for i :from 0
+                       :for code := (cffi:mem-aref pointer :unsigned-char i)
+                       :until (zerop code)
+                       :collect code)))
+      (map 'string 'code-char bytes))))
 
 (defun process-receive-output (process)
   (let ((cffi:*default-foreign-encoding* (process-encode process)))
