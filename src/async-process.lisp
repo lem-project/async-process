@@ -99,7 +99,10 @@
                        :for code := (cffi:mem-aref pointer :unsigned-char i)
                        :until (zerop code)
                        :collect code)))
-      (map 'string 'code-char bytes))))
+      (babel:octets-to-string
+       (make-array (length bytes)
+                   :element-type '(unsigned-byte 8)
+                   :initial-contents bytes)))))
 
 (defun process-receive-output (process)
   (let ((cffi:*default-foreign-encoding* (process-encode process)))
