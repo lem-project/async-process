@@ -95,14 +95,17 @@
 
 (defun pointer-to-string (pointer)
   (unless (cffi:null-pointer-p pointer)
-    (let ((bytes (loop :for i :from 0
-                       :for code := (cffi:mem-aref pointer :unsigned-char i)
-                       :until (zerop code)
-                       :collect code)))
-      (babel:octets-to-string
-       (make-array (length bytes)
-                   :element-type '(unsigned-byte 8)
-                   :initial-contents bytes)))))
+    (let* ((bytes (loop :for i :from 0
+                        :for code := (cffi:mem-aref pointer :unsigned-char i)
+                        :until (zerop code)
+                        :collect code))
+           (octets (make-array (length bytes)
+                               :element-type '(unsigned-byte 8)
+                               :initial-contents bytes)))
+      (handler-case (babel:octets-to-string octets)
+        (error ()
+          ;; Fallback when an error occurs with UTF-8 encoding
+          (map 'string #'code-char octets))))))
 
 (defun process-receive-output (process)
   (let ((cffi:*default-foreign-encoding* (process-encode process)))
