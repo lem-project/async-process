@@ -5,4 +5,7 @@
   :license "MIT"
   :depends-on ("cffi")
   :serial t
-  :components ((:file "async-process")))
+  :components ((:file "async-process_windows"
+                :if-feature (:or :win32 :windows))
+               (:file "async-process"
+                :if-feature (:not (:or :win32 :windows)))))
