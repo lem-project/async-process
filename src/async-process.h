@@ -5,17 +5,12 @@
 #  include "config.h"
 #endif
 
-
-#ifdef HAVE_WINDOWS_H
-# include <windows.h>
-#else
-# define _GNU_SOURCE
-# include <signal.h>
-# include <errno.h>
-# include <fcntl.h>
-# include <sys/wait.h>
-# include <termios.h>
-#endif
+#define _GNU_SOURCE
+#include <signal.h>
+#include <errno.h>
+#include <fcntl.h>
+#include <sys/wait.h>
+#include <termios.h>
 
 #include <stdio.h>
 #include <unistd.h>
@@ -25,16 +20,9 @@
 
 struct process {
   char buffer[1024*4];
-#ifdef HAVE_WINDOWS_H
-  PROCESS_INFORMATION pi;
-  HANDLE hInputWrite;
-  HANDLE hOutputRead;
-  bool nonblock;
-#else
   int fd;
   char *pty_name;
   pid_t pid;
-#endif
 };
 
 struct process* create_process(char *const command[], bool nonblock, const char *path);

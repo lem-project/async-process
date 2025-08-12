@@ -1,7 +1,5 @@
 #include "async-process.h"
 
-#ifndef HAVE_WINDOWS_H
-
 static const char* open_pty(int *out_fd)
 {
   int fd = posix_openpt(O_RDWR | O_CLOEXEC | O_NOCTTY);
@@ -133,4 +131,3 @@ int process_alive_p(struct process *process)
 {
   return kill(process->pid, 0) == 0;
 }
-#endif
