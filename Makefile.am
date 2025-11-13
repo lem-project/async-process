@@ -5,14 +5,19 @@ libasyncprocess_la_LDFLAGS = -module -avoid-version -no-undefined
 libasyncprocess_la_SOURCES = src/async-process.c
 
 copy:
-	$(MKDIR_P) static/`uname -m`/`uname`
-	cp -f .libs/libasyncprocess.so static/`uname -m`/`uname`/libasyncprocess.so|true
-	cp -f .libs/libasyncprocess.dylib static/`uname -m`/`uname`/libasyncprocess.dylib|true
-	case "$(MSYSTEM)" in \
-	  MINGW32)           \
-            $(MKDIR_P) static/x86/windows ;\
-	    cp -f .libs/libasyncprocess.dll static/x86/windows/libasyncprocess.dll|true;; \
-	  *)                 \
-            $(MKDIR_P) static/`uname -m`/windows ;\
-	    cp -f .libs/libasyncprocess.dll static/`uname -m`/windows/libasyncprocess.dll|true;; \
-	esac
+	@OS=$$(uname); \
+	ARCH=$$(uname -m); \
+	$(MKDIR_P) static/$$ARCH/$$OS; \
+	if [ "$$OS" = "Darwin" ]; then \
+	  cp -f .libs/libasyncprocess.dylib static/$$ARCH/$$OS/libasyncprocess.dylib; \
+	elif [ -n "$(MSYSTEM)" ]; then \
+	  if [ "$(MSYSTEM)" = "MINGW32" ]; then \
+	    $(MKDIR_P) static/x86/windows; \
+	    cp -f .libs/libasyncprocess.dll static/x86/windows/libasyncprocess.dll; \
+	  else \
+	    $(MKDIR_P) static/$$ARCH/windows; \
+	    cp -f .libs/libasyncprocess.dll static/$$ARCH/windows/libasyncprocess.dll; \
+	  fi; \
+	else \
+	  cp -f .libs/libasyncprocess.so static/$$ARCH/$$OS/libasyncprocess.so; \
+	fi
