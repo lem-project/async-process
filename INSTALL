@@ -5,8 +5,6 @@ Installation Instructions for async-process
 
 For most users on FreeBSD, Linux, or macOS:
 
-    ./bootstrap
-    ./configure
     make
     sudo make install
 
@@ -14,54 +12,57 @@ This will install to /usr/local by default.
 
 ## Detailed Installation Steps
 
-### 1. Bootstrap the Build System
+The Makefile handles everything automatically, including generating the
+configure script if needed. No bootstrap script required!
 
-If you're building from a git checkout (not a release tarball), first run:
+### 1. Build the Library
 
-    ./bootstrap
-
-This generates the configure script and necessary autotools files.
-
-### 2. Configure the Build
-
-Run configure to prepare the build:
-
-    ./configure
-
-By default, this installs to /usr/local on FreeBSD, Linux, and macOS.
-
-#### Custom Installation Prefix
-
-To install to a different location, use the --prefix option:
-
-    ./configure --prefix=/usr          # System-wide (/usr/lib, /usr/include)
-    ./configure --prefix=$HOME/.local  # User installation
-    ./configure --prefix=/opt/local    # Alternative location
-
-#### FreeBSD-Specific Examples
-
-    ./configure --prefix=/usr/local    # Standard FreeBSD location (default)
-    ./configure --prefix=/usr/local/async-process  # Isolated installation
-
-### 3. Build the Library
+Simply run:
 
     make
 
-This compiles libasyncprocess and prepares it for installation.
+This automatically:
+- Generates the configure script (if not present)
+- Runs configure with default settings
+- Builds the library
 
-### 4. Install
+### 2. Install
 
     make install
 
-This installs:
-- Library: $PREFIX/lib/libasyncprocess.so (or .dylib on macOS)
-- Header:  $PREFIX/include/async-process.h
+By default, this installs to /usr/local:
+- Library: /usr/local/lib/libasyncprocess.so (or .dylib on macOS)
+- Header:  /usr/local/include/async-process.h
 
 You may need to use sudo if installing to a system directory:
 
     sudo make install
 
-### 5. Configure Dynamic Linker (if needed)
+### 3. Custom Installation Prefix
+
+To install to a different location, specify PREFIX:
+
+    make install PREFIX=/usr              # System-wide
+    make install PREFIX=$HOME/.local      # User installation
+    make install PREFIX=/opt/local        # Alternative location
+
+#### FreeBSD-Specific Examples
+
+    make install PREFIX=/usr/local        # Standard FreeBSD location (default)
+    make install PREFIX=/usr/local/async-process  # Isolated installation
+
+## Advanced Usage
+
+### Manual Configure Options
+
+If you need custom configure options beyond --prefix, you can run configure manually:
+
+    make autogen                    # Generate configure script
+    ./configure --prefix=/usr/local --enable-shared --disable-static
+    make build                      # Build with custom configuration
+    make install
+
+## Configure Dynamic Linker (if needed)
 
 #### On Linux
 
@@ -81,7 +82,7 @@ Or add the library directory to LD_LIBRARY_PATH:
 
     export DYLD_LIBRARY_PATH=/your/prefix/lib:$DYLD_LIBRARY_PATH
 
-### 6. Verify Installation
+## Verify Installation
 
 Check that the library is installed:
 

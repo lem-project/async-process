@@ -1,5 +1,29 @@
 # async-process
 
+A Common Lisp library for creating and managing asynchronous processes with PTY support.
+
+## Installation
+
+### From Git
+
+```bash
+git clone https://github.com/soppelmann/async-process.git
+cd async-process
+make
+sudo make install
+```
+
+The library installs to `/usr/local` by default. To install elsewhere:
+
+```bash
+make install PREFIX=/usr
+make install PREFIX=$HOME/.local
+```
+
+See [INSTALL](INSTALL) for detailed installation instructions.
+
+## Usage
+
 ```
 CL-USER> (ql:quickload :async-process)
 To load "async-process":
