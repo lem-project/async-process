@@ -2,11 +2,15 @@ ACLOCAL_AMFLAGS = -I m4
 
 # Install library as a shared library instead of a module
 lib_LTLIBRARIES = libasyncprocess.la
-libasyncprocess_la_LDFLAGS = -version-info 0:1:0 -no-undefined
+libasyncprocess_la_LDFLAGS = -version-info 0:1:0 -no-undefined -rpath '$(libdir)'
 libasyncprocess_la_SOURCES = src/async-process.c
 
 # Install the header file
 include_HEADERS = src/async-process.h
+
+# Override any attempt to install hook
+install-exec-hook:
+	@echo "Installation complete."
 
 # Optional: development copy target for building static directory
 copy:
