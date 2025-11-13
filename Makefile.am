@@ -1,6 +1,8 @@
+ACLOCAL_AMFLAGS = -I m4
+
 pkglib_LTLIBRARIES = libasyncprocess.la
 libasyncprocess_la_LDFLAGS = -module -avoid-version -no-undefined
-libasyncprocess_la_SOURCES = src/async-process.c src/async-process_windows.c
+libasyncprocess_la_SOURCES = src/async-process.c
 
 copy:
 	$(MKDIR_P) static/`uname -m`/`uname`
