@@ -1,4 +1,3 @@
-
 *.o
 *.lo
 *.la
@@ -26,3 +25,5 @@ config.log
 libtool
 ltmain.sh
 
+# Don't track pre-built binaries
+static/
