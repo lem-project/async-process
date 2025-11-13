@@ -55,11 +55,11 @@ To install to a different location, specify PREFIX:
 
 ### Manual Configure Options
 
-If you need custom configure options beyond --prefix, you can run configure manually:
+If you need custom configure options beyond --prefix:
 
-    make autogen                    # Generate configure script
+    make                            # This generates configure if needed
     ./configure --prefix=/usr/local --enable-shared --disable-static
-    make build                      # Build with custom configuration
+    make
     make install
 
 ## Configure Dynamic Linker (if needed)
