@@ -1,0 +1,157 @@
+Installation Instructions for async-process
+===========================================
+
+## Quick Start
+
+For most users on FreeBSD, Linux, or macOS:
+
+    ./bootstrap
+    ./configure
+    make
+    sudo make install
+
+This will install to /usr/local by default.
+
+## Detailed Installation Steps
+
+### 1. Bootstrap the Build System
+
+If you're building from a git checkout (not a release tarball), first run:
+
+    ./bootstrap
+
+This generates the configure script and necessary autotools files.
+
+### 2. Configure the Build
+
+Run configure to prepare the build:
+
+    ./configure
+
+By default, this installs to /usr/local on FreeBSD, Linux, and macOS.
+
+#### Custom Installation Prefix
+
+To install to a different location, use the --prefix option:
+
+    ./configure --prefix=/usr          # System-wide (/usr/lib, /usr/include)
+    ./configure --prefix=$HOME/.local  # User installation
+    ./configure --prefix=/opt/local    # Alternative location
+
+#### FreeBSD-Specific Examples
+
+    ./configure --prefix=/usr/local    # Standard FreeBSD location (default)
+    ./configure --prefix=/usr/local/async-process  # Isolated installation
+
+### 3. Build the Library
+
+    make
+
+This compiles libasyncprocess and prepares it for installation.
+
+### 4. Install
+
+    make install
+
+This installs:
+- Library: $PREFIX/lib/libasyncprocess.so (or .dylib on macOS)
+- Header:  $PREFIX/include/async-process.h
+
+You may need to use sudo if installing to a system directory:
+
+    sudo make install
+
+### 5. Configure Dynamic Linker (if needed)
+
+#### On Linux
+
+If you installed to a non-standard prefix, you may need to update the linker cache:
+
+    sudo ldconfig
+
+Or add the library directory to LD_LIBRARY_PATH:
+
+    export LD_LIBRARY_PATH=/your/prefix/lib:$LD_LIBRARY_PATH
+
+#### On FreeBSD
+
+    sudo ldconfig -m /your/prefix/lib
+
+#### On macOS
+
+    export DYLD_LIBRARY_PATH=/your/prefix/lib:$DYLD_LIBRARY_PATH
+
+### 6. Verify Installation
+
+Check that the library is installed:
+
+    ls -l /usr/local/lib/libasyncprocess.*
+    ls -l /usr/local/include/async-process.h
+
+## Uninstalling
+
+To remove the installed files:
+
+    sudo make uninstall
+
+## Development Installation
+
+For development, you can use the optional 'copy' target to build platform-specific
+libraries in the static/ directory tree:
+
+    make copy
+
+This is useful for bundling pre-built libraries with the project, but is not
+needed for normal installation.
+
+## Platform-Specific Notes
+
+### FreeBSD
+
+FreeBSD uses /usr/local as the standard location for third-party software.
+The default configuration matches this convention.
+
+### Linux
+
+Most Linux distributions use /usr/local for locally-installed software.
+Package managers typically use /usr.
+
+### macOS
+
+Homebrew uses /usr/local on Intel Macs and /opt/homebrew on Apple Silicon.
+The default /usr/local works for manual installations.
+
+## Requirements
+
+- C compiler (GCC, Clang, etc.)
+- GNU Make
+- Autotools (autoconf, automake, libtool) - only needed for bootstrap
+- POSIX-compliant system (Unix, Linux, *BSD, macOS)
+
+## Troubleshooting
+
+### configure: command not found
+
+Run ./bootstrap first to generate the configure script.
+
+### Permission denied during make install
+
+Use sudo:
+
+    sudo make install
+
+### Library not found at runtime
+
+Configure your dynamic linker (see step 5 above).
+
+## For Packagers
+
+When building packages, use DESTDIR for staged installation:
+
+    make install DESTDIR=/path/to/staging/dir
+
+This installs to $DESTDIR/$PREFIX/... for packaging.
+
+## Support
+
+For issues, please visit: https://github.com/soppelmann/async-process

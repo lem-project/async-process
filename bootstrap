@@ -1,10 +1,42 @@
 #!/bin/sh
-libtoolize
-aclocal
+# Bootstrap script for async-process
+# This script sets up the autotools build system
+
+set -e
+
+echo "Bootstrapping async-process build system..."
+
+# Generate autotools files
+echo "Running libtoolize..."
+libtoolize --copy --force
+
+echo "Running aclocal..."
+aclocal -I m4
+
+echo "Running autoheader..."
 autoheader
-automake -a
+
+echo "Running automake..."
+automake --add-missing --copy --foreign
+
+echo "Running autoconf..."
 autoconf
 
-./configure
-make
-make copy
+echo ""
+echo "Bootstrap complete!"
+echo ""
+echo "Next steps:"
+echo "  1. Configure the build (with optional prefix):"
+echo "       ./configure                    # Default: /usr/local"
+echo "       ./configure --prefix=/usr      # System-wide"
+echo "       ./configure --prefix=\$HOME/.local  # User install"
+echo ""
+echo "  2. Build the library:"
+echo "       make"
+echo ""
+echo "  3. Install the library:"
+echo "       make install                   # May require sudo"
+echo ""
+echo "  4. (Optional) Copy to static directory for development:"
+echo "       make copy"
+echo ""
