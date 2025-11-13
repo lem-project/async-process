@@ -1,7 +1,8 @@
 AC_INIT([async-process], [0.1])
-AM_CONFIG_HEADER(config.h)
+AC_CONFIG_HEADERS([config.h])
+AC_CONFIG_MACRO_DIRS([m4])
 
-AM_INIT_AUTOMAKE([foreign])
+AM_INIT_AUTOMAKE([foreign subdir-objects])
 LT_INIT(shared win32-dll)
 AC_PROG_CC
 

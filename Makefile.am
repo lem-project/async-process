@@ -1,3 +1,5 @@
+ACLOCAL_AMFLAGS = -I m4
+
 pkglib_LTLIBRARIES = libasyncprocess.la
 libasyncprocess_la_LDFLAGS = -module -avoid-version -no-undefined
 libasyncprocess_la_SOURCES = src/async-process.c
