@@ -3,47 +3,48 @@ name: Build
 on:
   push:
   pull_request:
-  #schedule:
-  #  - cron: '0 */2 * * *'
 
 jobs:
-  build-linux:
+  build-linux-x86_64:
     runs-on: ubuntu-latest
     timeout-minutes: 90
     env:
-      OS_NAME: unknown
-      ARCH_NAME: unknown
-      DLL_NAME: libasyncprocess.so
-      RESULT_NAME: result-linux
-      RESULT_PATH: result-linux
+      OS_NAME: Linux
+      ARCH_NAME: x86_64
+      LIB_NAME: libasyncprocess.a
+      RESULT_NAME: result-linux-x86_64
+      RESULT_PATH: result-linux-x86_64
       RESULT_PATH_SUB: result-async/static
     steps:
-    - uses: actions/checkout@v2
-    - name: Set environment variables
-      run: |
-        pwd
-        uname
-        uname -m
-        OS_NAME=`uname`
-        ARCH_NAME=`uname -m`
-        echo "OS_NAME=$OS_NAME" >> $GITHUB_ENV
-        echo "ARCH_NAME=$ARCH_NAME" >> $GITHUB_ENV
+    - uses: actions/checkout@v4
     - name: Install
       run: |
+        sudo apt-get update
         sudo apt-get install libtool automake
     - name: Build
       run: |
         gcc -v
-        rm static/$ARCH_NAME/$OS_NAME/$DLL_NAME
-        ./bootstrap
+        # Generate build system
+        libtoolize --copy --force --quiet
+        aclocal
+        autoheader
+        automake --add-missing --copy --foreign
+        autoconf
+        # Configure for static library build
+        ./configure --enable-static --disable-shared
+        make
+    - name: Verify static library
+      run: |
+        file .libs/$LIB_NAME
+        ls -lh .libs/$LIB_NAME
     - name: Copy Result
       if: always()
       run: |
         mkdir -p $RESULT_PATH/$RESULT_PATH_SUB/$ARCH_NAME/$OS_NAME
-        cp static/$ARCH_NAME/$OS_NAME/$DLL_NAME $RESULT_PATH/$RESULT_PATH_SUB/$ARCH_NAME/$OS_NAME
+        cp .libs/$LIB_NAME $RESULT_PATH/$RESULT_PATH_SUB/$ARCH_NAME/$OS_NAME/
     - name: Upload Result
       if: always()
-      uses: actions/upload-artifact@v1
+      uses: actions/upload-artifact@v4
       with:
         name: ${{ env.RESULT_NAME }}
         path: ${{ env.RESULT_PATH }}
@@ -54,82 +55,174 @@ jobs:
     env:
       OS_NAME: Linux
       ARCH_NAME: aarch64
-      DLL_NAME: libasyncprocess.so
+      LIB_NAME: libasyncprocess.a
       RESULT_NAME: result-linux-aarch64
       RESULT_PATH: result-linux-aarch64
       RESULT_PATH_SUB: result-async/static
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v4
     - name: Build on aarch64 (arm64)
-      id: runcmd
-      uses: uraimo/run-on-arch-action@v1.0.5
+      uses: uraimo/run-on-arch-action@v2
       with:
-        architecture: aarch64
-        distribution: ubuntu18.04
+        arch: aarch64
+        distro: ubuntu22.04
+        githubToken: ${{ github.token }}
+        install: |
+          apt-get update -q -y
+          apt-get install -q -y build-essential automake libtool file
         run: |
-          apt-get update
-          apt-get -y install build-essential
-          apt-get -y install automake
-          apt-get -y install libtool
           pwd
-          uname
-          uname -m
-          gcc -v
-          rm static/${{ env.ARCH_NAME }}/${{ env.OS_NAME }}/${{ env.DLL_NAME }}
-          ./bootstrap
+          uname -a
+          gcc --version
+          # Generate build system
+          libtoolize --copy --force --quiet
+          aclocal
+          autoheader
+          automake --add-missing --copy --foreign
+          autoconf
+          # Configure for static library build
+          ./configure --enable-static --disable-shared
+          make
+          # Verify static library
+          file .libs/libasyncprocess.a
+          ls -lh .libs/libasyncprocess.a
     - name: Copy Result
       if: always()
       run: |
         mkdir -p $RESULT_PATH/$RESULT_PATH_SUB/$ARCH_NAME/$OS_NAME
-        cp static/$ARCH_NAME/$OS_NAME/$DLL_NAME $RESULT_PATH/$RESULT_PATH_SUB/$ARCH_NAME/$OS_NAME
+        cp .libs/$LIB_NAME $RESULT_PATH/$RESULT_PATH_SUB/$ARCH_NAME/$OS_NAME/
     - name: Upload Result
       if: always()
-      uses: actions/upload-artifact@v1
+      uses: actions/upload-artifact@v4
       with:
         name: ${{ env.RESULT_NAME }}
         path: ${{ env.RESULT_PATH }}
 
-  build-osx:
-    runs-on: macos-latest
+  build-osx-aarch64:
+    runs-on: macos-14  # macOS 14 runs on Apple Silicon (aarch64/arm64)
     timeout-minutes: 90
     env:
-      OS_NAME: unknown
-      ARCH_NAME: unknown
-      DLL_NAME: libasyncprocess.so
-      RESULT_NAME: result-osx
-      RESULT_PATH: result-osx
+      OS_NAME: Darwin
+      ARCH_NAME: aarch64
+      LIB_NAME: libasyncprocess.a
+      RESULT_NAME: result-osx-aarch64
+      RESULT_PATH: result-osx-aarch64
       RESULT_PATH_SUB: result-async/static
     steps:
-    - uses: actions/checkout@v2
-    - name: Set environment variables
-      run: |
-        pwd
-        uname
-        uname -m
-        OS_NAME=`uname`
-        ARCH_NAME=`uname -m`
-        echo "OS_NAME=$OS_NAME" >> $GITHUB_ENV
-        echo "ARCH_NAME=$ARCH_NAME" >> $GITHUB_ENV
+    - uses: actions/checkout@v4
     - name: Install tools
       run: |
         brew install automake
-        #brew install libtool
-        which glibtoolize
-        ln -s /usr/local/bin/glibtoolize /usr/local/bin/libtoolize
-        which libtoolize
+        brew install libtool
     - name: Build
       run: |
         gcc -v
-        rm static/$ARCH_NAME/$OS_NAME/$DLL_NAME
-        ./bootstrap
+        # Generate build system
+        glibtoolize --copy --force --quiet
+        aclocal
+        autoheader
+        automake --add-missing --copy --foreign
+        autoconf
+        # Configure for static library build
+        ./configure --enable-static --disable-shared
+        make
+    - name: Verify static library
+      run: |
+        file .libs/$LIB_NAME
+        ls -lh .libs/$LIB_NAME
+        lipo -info .libs/$LIB_NAME
     - name: Copy Result
       if: always()
       run: |
         mkdir -p $RESULT_PATH/$RESULT_PATH_SUB/$ARCH_NAME/$OS_NAME
-        cp static/$ARCH_NAME/$OS_NAME/$DLL_NAME $RESULT_PATH/$RESULT_PATH_SUB/$ARCH_NAME/$OS_NAME
+        cp .libs/$LIB_NAME $RESULT_PATH/$RESULT_PATH_SUB/$ARCH_NAME/$OS_NAME/
     - name: Upload Result
       if: always()
-      uses: actions/upload-artifact@v1
+      uses: actions/upload-artifact@v4
       with:
         name: ${{ env.RESULT_NAME }}
         path: ${{ env.RESULT_PATH }}
+
+  build-osx-x86_64:
+    runs-on: macos-13  # macOS 13 runs on Intel (x86_64)
+    timeout-minutes: 90
+    env:
+      OS_NAME: Darwin
+      ARCH_NAME: x86_64
+      LIB_NAME: libasyncprocess.a
+      RESULT_NAME: result-osx-x86_64
+      RESULT_PATH: result-osx-x86_64
+      RESULT_PATH_SUB: result-async/static
+    steps:
+    - uses: actions/checkout@v4
+    - name: Install tools
+      run: |
+        brew install automake
+        brew install libtool
+    - name: Build
+      run: |
+        gcc -v
+        # Generate build system
+        glibtoolize --copy --force --quiet
+        aclocal
+        autoheader
+        automake --add-missing --copy --foreign
+        autoconf
+        # Configure for static library build
+        ./configure --enable-static --disable-shared
+        make
+    - name: Verify static library
+      run: |
+        file .libs/$LIB_NAME
+        ls -lh .libs/$LIB_NAME
+        lipo -info .libs/$LIB_NAME
+    - name: Copy Result
+      if: always()
+      run: |
+        mkdir -p $RESULT_PATH/$RESULT_PATH_SUB/$ARCH_NAME/$OS_NAME
+        cp .libs/$LIB_NAME $RESULT_PATH/$RESULT_PATH_SUB/$ARCH_NAME/$OS_NAME/
+    - name: Upload Result
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{ env.RESULT_NAME }}
+        path: ${{ env.RESULT_PATH }}
+
+  release:
+    runs-on: ubuntu-latest
+    needs: [build-linux-x86_64, build-linux-aarch64, build-osx-aarch64, build-osx-x86_64]
+    if: startsWith(github.ref, 'refs/tags/')
+    steps:
+    - name: Download all artifacts
+      uses: actions/download-artifact@v4
+      with:
+        path: artifacts
+
+    - name: Prepare release files
+      run: |
+        mkdir -p release-files
+        echo "Finding all .a files in artifacts..."
+        find artifacts -name "*.a" -type f
+        echo ""
+        echo "Creating uniquely named release files..."
+        # Find and rename all library files with their arch and os
+        find artifacts -name "*.a" -type f | while read file; do
+          # Extract the directory structure to get arch and os
+          dir=$(dirname "$file")
+          arch=$(basename "$(dirname "$dir")")
+          os=$(basename "$dir")
+          # Normalize OS name to lowercase for consistency
+          os_lower=$(echo "$os" | tr '[:upper:]' '[:lower:]')
+          # Create a unique filename: libasyncprocess.{os}.{arch}.a
+          output_name="libasyncprocess.${os_lower}.${arch}.a"
+          echo "  $file -> release-files/$output_name"
+          cp "$file" "release-files/$output_name"
+        done
+        echo ""
+        echo "Release files ready for upload:"
+        ls -lh release-files/
+
+    - name: Create Release
+      uses: softprops/action-gh-release@v1
+      with:
+        files: release-files/*

@@ -1,5 +1,62 @@
 # async-process
 
+A Common Lisp library for creating and managing asynchronous processes with PTY support.
+
+## Platform Support
+
+- **Linux**: Full support via C library using PTY
+- **BSD**: Full support via C library using PTY
+- **macOS**: Full support via C library using PTY
+- **Windows**: Full support via pure Lisp CFFI implementation (no C compilation required)
+
+## Installation
+
+### Unix-like Systems (Linux, FreeBSD, macOS)
+using GNU make, `gmake` on Freebsd and macOS.
+
+```bash
+git clone https://github.com/soppelmann/async-process.git
+cd async-process
+make
+sudo make install
+```
+
+The library installs to `/usr/local` by default. To install elsewhere:
+
+```bash
+make install PREFIX=/usr
+make install PREFIX=$HOME/.local
+```
+
+#### Configuration options
+Build as a static library as follows
+
+```bash
+make
+./configure --enable-static
+make all
+sudo make install
+```
+
+### Windows
+
+On Windows, no C compilation is required. The library uses a pure Lisp implementation via CFFI:
+
+```bash
+git clone https://github.com/soppelmann/async-process.git
+cd async-process
+```
+
+Then simply load the library in your Lisp environment:
+
+```lisp
+(ql:quickload :async-process)
+```
+
+The ASDF system will automatically load the Windows-specific implementation (`src/async-process_windows.lisp`) when on Windows platforms.
+
+## Usage
+
 ```
 CL-USER> (ql:quickload :async-process)
 To load "async-process":
