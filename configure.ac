@@ -1,4 +1,8 @@
-AC_INIT([async-process], [0.1])
+dnl  Get the version number from async-process.asd
+m4_define([ASD_VERSION],
+          m4_esyscmd_s([grep :version src/async-process.asd | cut -d\" -f2]))
+AC_INIT([async-process],
+        [ASD_VERSION])
 AC_CONFIG_HEADERS([config.h])
 
 # Library versioning (current:revision:age)
