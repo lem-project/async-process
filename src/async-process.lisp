@@ -21,21 +21,30 @@
 (pushnew (asdf:system-relative-pathname
           :async-process
           (format nil "../static/~A/"
-                  (cond ((uiop/os:featurep '(:and :windows :x86-64))
-                         "x86_64/windows")
-                        ((uiop/os:featurep :windows) "x86/windows")
-                        ((uiop/os:featurep :unix)
-                         (format nil "~A/~A"
-                                 (system "uname -m")
-                                 (let ((os (system "uname")))
-                                   (cond ((and (equal os "Linux")
-                                               (muslp))
-                                          "Linux-musl")
-                                         (t os))))))))
+                  (cond
+                    ;; Windows
+                    ((uiop/os:featurep '(:and :windows :x86-64))
+                     "x86_64/windows")
+                    ((uiop/os:featurep :windows)
+                     "x86/windows")
+                    ;; macOS (Darwin)
+                    ((uiop/os:featurep :os-macosx)
+                     (format nil "~A/darwin"
+                             (uiop:run-program '("uname" "-m") :output '(:string :stripped t))))
+                    ;; Linux / Generic Unix
+                    ((uiop/os:featurep :unix)
+                     (format nil "~A/~A"
+                             (uiop:run-program '("uname" "-m") :output '(:string :stripped t))
+                             (let ((os (uiop:run-program '("uname") :output '(:string :stripped t))))
+                               (cond ((and (equal os "Linux")
+                                           (ignore-errors (funcall (read-from-string "muslp"))))
+                                      "Linux-musl")
+                                     (t os))))))))
          cffi:*foreign-library-directories*
          :test #'uiop:pathname-equal)
 
 (cffi:define-foreign-library async-process
+  (:darwin "libasyncprocess.dylib")
   (:unix "libasyncprocess.so")
   (:windows "libasyncprocess.dll"))
 
